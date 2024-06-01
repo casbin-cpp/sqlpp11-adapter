@@ -1,4 +1,4 @@
-#  Copyright 2020 The casbin Authors. All Rights Reserved.
+#  Copyright 2021 The casbin Authors. All Rights Reserved.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -11,41 +11,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-cmake_minimum_required(VERSION 3.19)
-
-set(CMAKE_WARN_DEPRECATED ON)
-
-#sqlpp11
-project(Test VERSION 0.1 LANGUAGES CXX)
+### Preamble ###
+cmake_minimum_required(VERSION 3.14)
+project(11sql VERSION 0.1 LANGUAGES CXX)
 
 ##### Project wide setup ####
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+add_definitions(-DNOMINMAX)
 
+### Dependencies ###
+add_subdirectory(dependencies)
 
-#casbin
-add_executable(test )
-
-target_link_libraries(test PRIVATE casbin)
-
-set(test_INCLUDE_DIR ${casbin_SOURCE_DIR}/include)
-target_include_directories(test PRIVATE ${myexec_INCLUDE_DIR})
-
-
-target_link_libraries(test
-        PRIVATE
-        sqlpp11::sqlpp11
-        # Corresponding targets for the connectors. These connectors need to be enabled in the the dependencies/sqlpp11 folder. These targets automatically link against sqlpp11::sqlpp11 and therefore sqlpp11::sqlpp11 doesn't need to be linked manually again
-        # sqlpp11::sqlite3
-        # sqlpp11::sqlcipher
-        # sqlpp11::mysql
-        # sqlpp11::mariadb
-        # sqlpp11::postgresql
-)
-
-target_sources(test
-        PRIVATE
-        sqlpp11_adapter.cpp
-        test.cpp
-)
+### Main Targets ###
+add_definitions(-Dmodelpath=${CMAKE_SOURCE_DIR})
+enable_testing()
+add_subdirectory(src)
