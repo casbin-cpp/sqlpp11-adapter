@@ -1,22 +1,37 @@
+# Copyright 2024 The casbin Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 CXX = g++
-
-
-CXXFLAGS = -Wall -std=c++11
+CXXFLAGS = -Wall -std=c++17 -I. $(shell pkg-config --cflags casbin)
+LDFLAGS = $(shell pkg-config --libs casbin)
 
 TARGET = test
 
-
 OBJS = sqlpp11_adapter.o test.o
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+all: $(TARGET)
 
-sqlpp11_adapter.o: sqlpp11_adapter.cpp sqlpp11_adapter.h
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) $(LDFLAGS)
+
+sqlpp11_adapter.o: sqlpp11_adapter.cpp include/sqlpp11_adapter.h include/CasbinRule.h
 	$(CXX) $(CXXFLAGS) -c sqlpp11_adapter.cpp
 
-test.o: test.cpp sqlpp11_adapter.h
+test.o: test.cpp include/sqlpp11_adapter.h
 	$(CXX) $(CXXFLAGS) -c test.cpp
 
 clean:
 	rm -f $(TARGET) $(OBJS)
+
+.PHONY: all clean
