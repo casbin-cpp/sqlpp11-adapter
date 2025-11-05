@@ -59,6 +59,7 @@ jobs:
             build-essential \
             cmake \
             libmysqlclient-dev \
+            nlohmann-json3-dev \
             pkg-config
             
       - name: Install Casbin-CPP
