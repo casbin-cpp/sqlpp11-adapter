@@ -50,7 +50,8 @@ void Sqlpp11Adapter::LoadPolicy(const std::shared_ptr<Model>& model) {
     }
 }
 
-void Sqlpp11Adapter::LoadPolicyLine(const CasbinRuleTable::Row& row,
+template<typename Row>
+void Sqlpp11Adapter::LoadPolicyLine(const Row& row,
                                     const std::shared_ptr<Model>& model) {
     std::vector<std::string> tokens;
     tokens.push_back(row.ptype);

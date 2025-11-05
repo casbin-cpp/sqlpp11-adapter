@@ -46,7 +46,8 @@ private:
     std::shared_ptr<sqlpp::mysql::connection> db_;
     std::string table_name_;
     
-    void LoadPolicyLine(const CasbinRuleTable::Row& row, const std::shared_ptr<Model>& model);
+    template<typename Row>
+    void LoadPolicyLine(const Row& row, const std::shared_ptr<Model>& model);
 };
 
 } // namespace casbin

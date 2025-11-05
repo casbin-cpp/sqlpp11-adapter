@@ -21,16 +21,7 @@
 
 namespace casbin {
 
-struct CasbinRuleTable : sqlpp::table_t<CasbinRuleTable,
-    struct Id,
-    struct Ptype,
-    struct V0,
-    struct V1,
-    struct V2,
-    struct V3,
-    struct V4,
-    struct V5>
-{
+namespace CasbinRule_ {
     struct Id {
         struct _alias_t {
             static constexpr const char _literal[] = "id";
@@ -142,8 +133,18 @@ struct CasbinRuleTable : sqlpp::table_t<CasbinRuleTable,
         };
         using _traits = sqlpp::make_traits<sqlpp::varchar, sqlpp::tag::can_be_null>;
     };
+}
 
-    using _value_type = sqlpp::no_value_t;
+struct CasbinRuleTable : sqlpp::table_t<CasbinRuleTable,
+    CasbinRule_::Id,
+    CasbinRule_::Ptype,
+    CasbinRule_::V0,
+    CasbinRule_::V1,
+    CasbinRule_::V2,
+    CasbinRule_::V3,
+    CasbinRule_::V4,
+    CasbinRule_::V5>
+{
     struct _alias_t {
         static constexpr const char _literal[] = "casbin_rule";
         using _name_t = sqlpp::make_char_sequence<sizeof(_literal), _literal>;
