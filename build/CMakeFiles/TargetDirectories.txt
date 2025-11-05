@@ -1,3 +1,0 @@
-/home/runner/work/sqlpp11-adapter/sqlpp11-adapter/build/CMakeFiles/test.dir
-/home/runner/work/sqlpp11-adapter/sqlpp11-adapter/build/CMakeFiles/edit_cache.dir
-/home/runner/work/sqlpp11-adapter/sqlpp11-adapter/build/CMakeFiles/rebuild_cache.dir

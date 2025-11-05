@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/test.dir/link.d CMakeFiles/test.dir/sqlpp11_adapter.cpp.o CMakeFiles/test.dir/test.cpp.o -o test  -lcasbin -lsqlpp11::sqlpp11
