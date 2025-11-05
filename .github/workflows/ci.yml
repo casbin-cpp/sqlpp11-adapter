@@ -31,6 +31,21 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: casbin
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
         
     steps:
       - name: Checkout code
@@ -44,7 +59,6 @@ jobs:
             build-essential \
             cmake \
             libmysqlclient-dev \
-            mysql-server \
             pkg-config
             
       - name: Install Casbin-CPP
@@ -65,24 +79,9 @@ jobs:
           sudo cmake --build . --target install
           cd ../..
           
-      - name: Setup MySQL
-        if: runner.os == 'Linux'
+      - name: Verify MySQL connection
         run: |
-          sudo systemctl start mysql.service
-          # Wait for MySQL to be ready
-          for i in {1..30}; do
-            if sudo mysqladmin ping --silent; then
-              break
-            fi
-            echo 'waiting for mysqld to be ready...'
-            sleep 1
-          done
-          # Create database (using sudo to authenticate via auth_socket)
-          sudo mysql << EOF
-          CREATE DATABASE IF NOT EXISTS casbin;
-          ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
-          FLUSH PRIVILEGES;
-          EOF
+          mysql -h 127.0.0.1 -u root -e "SHOW DATABASES;"
           
       - name: Configure CMake
         run: |
@@ -96,6 +95,8 @@ jobs:
           cmake --build . --config Release -j $(nproc)
           
       - name: Run tests
+        env:
+          MYSQL_HOST: 127.0.0.1
         run: |
           cd build
           ./test || echo "Tests require MySQL connection"

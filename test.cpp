@@ -14,6 +14,7 @@
 
 #include "include/sqlpp11_adapter.h"
 #include <casbin/casbin.h>
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 
@@ -23,9 +24,15 @@ void TestBasicOperations() {
     std::cout << "Testing basic adapter operations..." << std::endl;
     
     try {
+        // Get MySQL host from environment or use default
+        const char* mysql_host = std::getenv("MYSQL_HOST");
+        if (!mysql_host) {
+            mysql_host = "localhost";
+        }
+        
         // Create adapter instance
         auto adapter = std::make_shared<Sqlpp11Adapter>(
-            "localhost", "root", "", "casbin", 3306
+            mysql_host, "root", "", "casbin", 3306
         );
         
         // Create table
