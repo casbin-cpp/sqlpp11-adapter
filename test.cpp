@@ -62,7 +62,7 @@ void TestBasicOperations() {
         
         std::cout << "Enforcement results:" << std::endl;
         std::cout << "  alice, data1, read: " << (result1 ? "PASS" : "FAIL") << std::endl;
-        std::cout << "  alice, data1, write: " << (result2 ? "FAIL" : "PASS") << std::endl;
+        std::cout << "  alice, data1, write: " << (!result2 ? "PASS (correctly denied)" : "FAIL (should be denied)") << std::endl;
         std::cout << "  alice, data2, read: " << (result3 ? "PASS" : "FAIL") << std::endl;
         std::cout << "  alice, data2, write: " << (result4 ? "PASS" : "FAIL") << std::endl;
         std::cout << "  bob, data2, write: " << (result5 ? "PASS" : "FAIL") << std::endl;

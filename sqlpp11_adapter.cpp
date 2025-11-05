@@ -63,8 +63,8 @@ void Sqlpp11Adapter::LoadPolicyLine(const Row& row,
     if (!row.v4.is_null()) tokens.push_back(row.v4.value());
     if (!row.v5.is_null()) tokens.push_back(row.v5.value());
 
-    if (tokens.empty()) {
-        return;
+    if (tokens.size() < 2) {
+        return;  // Need at least ptype and one value
     }
 
     std::string key = tokens[0];
@@ -84,33 +84,32 @@ void Sqlpp11Adapter::SavePolicy(Model& model) {
 
         CasbinRuleTable casbin_rule;
 
+        // Helper lambda to insert a single policy rule
+        auto insertRule = [this, &casbin_rule](const std::string& ptype, 
+                                                const std::vector<std::string>& rule) {
+            auto insert = sqlpp::insert_into(casbin_rule).set(
+                casbin_rule.ptype = ptype,
+                casbin_rule.v0 = rule.size() > 0 ? sqlpp::value(rule[0]) : sqlpp::null,
+                casbin_rule.v1 = rule.size() > 1 ? sqlpp::value(rule[1]) : sqlpp::null,
+                casbin_rule.v2 = rule.size() > 2 ? sqlpp::value(rule[2]) : sqlpp::null,
+                casbin_rule.v3 = rule.size() > 3 ? sqlpp::value(rule[3]) : sqlpp::null,
+                casbin_rule.v4 = rule.size() > 4 ? sqlpp::value(rule[4]) : sqlpp::null,
+                casbin_rule.v5 = rule.size() > 5 ? sqlpp::value(rule[5]) : sqlpp::null
+            );
+            (*db_)(insert);
+        };
+
+        // Save policy rules
         for (const auto& [ptype, ast] : model.m["p"].assertion_map) {
             for (const auto& rule : ast->policy) {
-                auto insert = sqlpp::insert_into(casbin_rule).set(
-                    casbin_rule.ptype = ptype,
-                    casbin_rule.v0 = rule.size() > 0 ? sqlpp::value(rule[0]) : sqlpp::null,
-                    casbin_rule.v1 = rule.size() > 1 ? sqlpp::value(rule[1]) : sqlpp::null,
-                    casbin_rule.v2 = rule.size() > 2 ? sqlpp::value(rule[2]) : sqlpp::null,
-                    casbin_rule.v3 = rule.size() > 3 ? sqlpp::value(rule[3]) : sqlpp::null,
-                    casbin_rule.v4 = rule.size() > 4 ? sqlpp::value(rule[4]) : sqlpp::null,
-                    casbin_rule.v5 = rule.size() > 5 ? sqlpp::value(rule[5]) : sqlpp::null
-                );
-                (*db_)(insert);
+                insertRule(ptype, rule);
             }
         }
 
+        // Save grouping rules
         for (const auto& [ptype, ast] : model.m["g"].assertion_map) {
             for (const auto& rule : ast->policy) {
-                auto insert = sqlpp::insert_into(casbin_rule).set(
-                    casbin_rule.ptype = ptype,
-                    casbin_rule.v0 = rule.size() > 0 ? sqlpp::value(rule[0]) : sqlpp::null,
-                    casbin_rule.v1 = rule.size() > 1 ? sqlpp::value(rule[1]) : sqlpp::null,
-                    casbin_rule.v2 = rule.size() > 2 ? sqlpp::value(rule[2]) : sqlpp::null,
-                    casbin_rule.v3 = rule.size() > 3 ? sqlpp::value(rule[3]) : sqlpp::null,
-                    casbin_rule.v4 = rule.size() > 4 ? sqlpp::value(rule[4]) : sqlpp::null,
-                    casbin_rule.v5 = rule.size() > 5 ? sqlpp::value(rule[5]) : sqlpp::null
-                );
-                (*db_)(insert);
+                insertRule(ptype, rule);
             }
         }
     } catch (const sqlpp::exception& e) {
