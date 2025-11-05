@@ -22,10 +22,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Find required packages
-find_package(PkgConfig REQUIRED)
-
-# Find casbin
-pkg_check_modules(CASBIN REQUIRED casbin)
+find_package(casbin REQUIRED)
 
 # Add library target
 add_library(sqlpp11_adapter STATIC
@@ -35,12 +32,11 @@ add_library(sqlpp11_adapter STATIC
 target_include_directories(sqlpp11_adapter
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CASBIN_INCLUDE_DIRS}
 )
 
 target_link_libraries(sqlpp11_adapter
     PUBLIC
-        ${CASBIN_LIBRARIES}
+        casbin
 )
 
 # Add test executable
@@ -52,12 +48,11 @@ add_executable(test
 target_include_directories(test
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CASBIN_INCLUDE_DIRS}
 )
 
 target_link_libraries(test
     PRIVATE
-        ${CASBIN_LIBRARIES}
+        casbin
 )
 
 # Installation rules

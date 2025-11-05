@@ -13,8 +13,8 @@
 # limitations under the License.
 
 CXX = g++
-CXXFLAGS = -Wall -std=c++17 -I. $(shell pkg-config --cflags casbin)
-LDFLAGS = $(shell pkg-config --libs casbin)
+CXXFLAGS = -Wall -std=c++17 -I. -I/usr/local/include
+LDFLAGS = -L/usr/local/lib -lcasbin
 
 TARGET = test
 
