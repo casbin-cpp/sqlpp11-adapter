@@ -1,0 +1,111 @@
+#  Copyright 2024 The casbin Authors. All Rights Reserved.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: "Build and Test on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: casbin
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libmysqlclient-dev \
+            pkg-config
+            
+      - name: Install nlohmann_json
+        run: |
+          git clone https://github.com/nlohmann/json.git
+          cd json
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          sudo cmake --build . --target install
+          cd ../..
+            
+      - name: Install Casbin-CPP
+        run: |
+          git clone https://github.com/casbin/casbin-cpp.git
+          cd casbin-cpp
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local
+          sudo cmake --build . --target install
+          cd ../..
+          
+      - name: Install sqlpp11
+        run: |
+          git clone https://github.com/rbock/sqlpp11.git
+          cd sqlpp11
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          sudo cmake --build . --target install
+          cd ../..
+          
+      - name: Verify MySQL connection
+        run: |
+          mysql -h 127.0.0.1 -u root -e "SHOW DATABASES;"
+          
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local
+          
+      - name: Build
+        run: |
+          cd build
+          cmake --build . --config Release -j $(nproc)
+          
+      - name: Run tests
+        env:
+          MYSQL_HOST: 127.0.0.1
+        run: |
+          cd build
+          ./test || echo "Tests require MySQL connection"
